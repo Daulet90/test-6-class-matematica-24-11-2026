@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тест · Мәтінді есептерді шығару · 6Ә</title>
+<style>
+  /* ===== Академиялық стиль ===== */
+  :root{
+    --ink:#1d2433;
+    --muted:#5b6472;
+    --line:#d6d9de;
+    --paper:#ffffff;
+    --bg:#f3f4f6;
+    --accent:#1f3a5f;
+    --accent-soft:#e8edf4;
+    --warn:#8a1c1c;
+    --warn-bg:#fbeeee;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Times New Roman",Georgia,"PT Serif",serif;
+    font-size:18px;
+    line-height:1.55;
+  }
+  .wrap{max-width:780px;margin:0 auto;padding:28px 16px 48px}
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:32px 36px;
+  }
+  h1{font-size:26px;margin:0 0 4px;font-weight:700;letter-spacing:.2px}
+  h2{font-size:19px;margin:0 0 18px;font-weight:400;color:var(--muted)}
+  .rule{border:0;border-top:2px solid var(--accent);margin:18px 0 22px}
+  .meta{width:100%;border-collapse:collapse;margin-bottom:22px;font-size:17px}
+  .meta td{padding:7px 0;border-bottom:1px solid var(--line);vertical-align:top}
+  .meta td:first-child{color:var(--muted);width:38%;padding-right:12px}
+  label.f{display:block;font-size:16px;color:var(--muted);margin:16px 0 6px}
+  input[type=text],select{
+    width:100%;font:inherit;font-size:18px;color:var(--ink);
+    padding:10px 12px;border:1px solid #b9bec7;border-radius:3px;background:#fff;
+  }
+  input[type=text]:focus,select:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
+  .variants{display:flex;gap:12px}
+  .variants label{
+    flex:1;display:flex;align-items:center;gap:10px;cursor:pointer;
+    border:1px solid #b9bec7;border-radius:3px;padding:10px 14px;
+  }
+  .variants input{accent-color:var(--accent);width:18px;height:18px}
+  .rules{font-size:15.5px;color:var(--muted);background:var(--accent-soft);
+    border-left:3px solid var(--accent);padding:12px 16px;margin:22px 0 0}
+  .rules ul{margin:6px 0 0;padding-left:20px}
+  .btn{
+    display:inline-block;font:inherit;font-size:17px;
+    background:var(--accent);color:#fff;border:1px solid var(--accent);
+    padding:11px 30px;border-radius:3px;cursor:pointer;margin-top:24px;
+  }
+  .btn:disabled{background:#c3c8d0;border-color:#c3c8d0;cursor:not-allowed}
+  .btn.right{float:right}
+  .clear{clear:both}
+
+  /* ===== Сұрақ беті ===== */
+  .topbar{display:flex;justify-content:space-between;align-items:center;
+    font-size:15px;color:var(--muted);margin-bottom:10px}
+  .timer{font-family:"Courier New",monospace;font-size:20px;color:var(--ink);
+    border:1px solid var(--line);padding:3px 10px;border-radius:3px;background:#fff}
+  .timer.low{color:var(--warn);border-color:var(--warn)}
+  .progress{height:4px;background:var(--line);margin-bottom:18px}
+  .progress > div{height:100%;background:var(--accent);width:0}
+  .qnum{font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+  .qtext{font-size:19px;margin-bottom:22px}
+  .opt{
+    display:flex;align-items:center;gap:14px;cursor:pointer;
+    border:1px solid var(--line);border-radius:3px;padding:12px 16px;margin-bottom:10px;background:#fff;
+  }
+  .opt:hover{border-color:#9aa2ae}
+  .opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .opt .lt{font-weight:700;width:22px;color:var(--accent)}
+  .opt input{display:none}
+  .numbox{max-width:280px}
+  .hint{font-size:15px;color:var(--muted);margin-top:8px}
+
+  /* бөлшек */
+  .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+    font-size:.92em;line-height:1.1;margin:0 2px}
+  .frac > span:first-child{border-bottom:1px solid currentColor;padding:0 3px}
+  .frac > span:last-child{padding:0 3px}
+
+  /* ===== Нәтиже ===== */
+  .score{font-size:46px;font-weight:700;color:var(--accent);margin:10px 0}
+  .res td{padding:8px 0}
+  .status{font-size:15px;color:var(--muted);margin-top:14px}
+
+  /* ===== Ескерту терезесі ===== */
+  .modal-bg{position:fixed;inset:0;background:rgba(20,24,33,.55);display:none;
+    align-items:center;justify-content:center;padding:16px;z-index:50}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff;max-width:520px;width:100%;border-top:4px solid var(--warn);
+    padding:26px 28px;border-radius:3px}
+  .modal h3{margin:0 0 10px;color:var(--warn);font-size:21px}
+  .modal p{margin:8px 0}
+  .warnline{background:var(--warn-bg);color:var(--warn);font-size:15px;padding:8px 12px;
+    margin-bottom:16px;border-left:3px solid var(--warn);display:none}
+
+  .hidden{display:none}
+  footer{text-align:center;font-size:13px;color:var(--muted);margin-top:18px}
+  @media (max-width:560px){
+    .card{padding:22px 18px}
+    body{font-size:17px}
+    .variants{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ========== 1. Бастапқы терезе ========== -->
+  <section id="start" class="card">
+    <h1>Тест</h1>
+    <h2>Мәтінді есептерді шығару</h2>
+    <hr class="rule">
+    <table class="meta">
+      <tr><td>Пән</td><td>Математика</td></tr>
+      <tr><td>Тақырып</td><td>Мәтінді есептерді шығару</td></tr>
+      <tr><td>Оқу мақсаты</td><td>6.5.1.4 — рационал сандарды қолданып мәтінді есептерді шығару</td></tr>
+      <tr><td>Мұғалім</td><td>учитель математики – Кунгозин Даулет Багдашұлы</td></tr>
+    </table>
+
+    <label class="f" for="fio">Аты-жөні (Тегі, Аты)</label>
+    <input type="text" id="fio" autocomplete="off" placeholder="Введите ФИ">
+
+    <label class="f" for="cls">Сынып</label>
+    <select id="cls">
+      <option value="">— таңдаңыз —</option>
+      <option value="6Ә">6Ә</option>
+    </select>
+
+    <label class="f">Нұсқа</label>
+    <div class="variants">
+      <label><input type="radio" name="var" value="1"> 1-нұсқа</label>
+      <label><input type="radio" name="var" value="2"> 2-нұсқа</label>
+    </div>
+
+    <div class="rules">
+      <strong>Тест ережесі</strong>
+      <ul>
+        <li>10 тапсырма: 8 тапсырмада бір дұрыс жауапты таңдайсыз, 2 тапсырмада жауапты сан түрінде енгізесіз.</li>
+        <li>Әр тапсырмаға — 3 минут. Уақыт бітсе, келесі тапсырмаға автоматты түрде өтеді.</li>
+        <li>Әр дұрыс жауап — 1 балл. Барлығы — 10 балл.</li>
+        <li>Алдыңғы тапсырмаға қайтуға болмайды.</li>
+        <li>Тест кезінде бетті (қойындыны) жасыруға немесе басқа қойындыға өтуге болмайды — бағаңыз 1 балға төмендетіледі.</li>
+      </ul>
+    </div>
+
+    <button class="btn right" id="btnStart" disabled>Әрі қарай →</button>
+    <div class="clear"></div>
+  </section>
+
+  <!-- ========== 2. Сұрақ беті ========== -->
+  <section id="quiz" class="card hidden">
+    <div class="warnline" id="warnline"></div>
+    <div class="topbar">
+      <span id="who"></span>
+      <span class="timer" id="timer">03:00</span>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="qnum" id="qnum"></div>
+    <div class="qtext" id="qtext"></div>
+    <div id="answers"></div>
+    <button class="btn right" id="btnNext" disabled>Келесі →</button>
+    <div class="clear"></div>
+  </section>
+
+  <!-- ========== 3. Нәтиже ========== -->
+  <section id="result" class="card hidden">
+    <h1>Тест аяқталды</h1>
+    <h2>Мәтінді есептерді шығару · Математика</h2>
+    <hr class="rule">
+    <div>Сіздің нәтижеңіз:</div>
+    <div class="score" id="scoreBig"></div>
+    <table class="meta res" id="resTable"></table>
+    <div class="status" id="sendStatus">Нәтиже мұғалімге жіберілуде…</div>
+  </section>
+
+  <footer>Математика · 6Ә · Кунгозин Д. Б.</footer>
+</div>
+
+<!-- ========== Ескерту терезесі ========== -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3>Ескерту!</h3>
+    <p>Сіз тест кезінде бетті (қойындыны) жасырдыңыз немесе басқа қойындыға өттіңіз.</p>
+    <p><strong>Осы әрекет үшін бағаңыз 1 балға төмендетіледі.</strong> Бұл туралы мәлімет мұғалімге жіберіледі.</p>
+    <p>Жасыру саны: <strong id="hideCount">0</strong></p>
+    <p>Тест жалғасуда. Қойындыдан шықпаңыз.</p>
+    <button class="btn" id="btnModal">Түсіндім, жалғастыру</button>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   БАПТАУ: Apps Script веб-қосымшасының сілтемесін осында қойыңыз
+   ===================================================================== */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqJgoP5XpzcB6NzdD-vaPypHanV45rx3-73zapJyrAt5EfmL9FwTCDy7-EGOwGncSu/exec";
+
+const TIME_PER_Q = 180;   // 3 минут
+const PENALTY    = 1;     // жасырғаны үшін айып балл
+const TOPIC      = "Мәтінді есептерді шығару (6.5.1.4)";
+
+const fr = (a,b) => `<span class="frac"><span>${a}</span><span>${b}</span></span>`;
+
+/* ===================== СҰРАҚТАР ===================== */
+const VARIANTS = {
+  1: [
+    {t:"mc", q:"Таңертең ауа температурасы −7 °C болды. Түске қарай температура 12 °C-қа көтерілді. Түстегі ауа температурасы қандай?",
+     o:["5 °C","−19 °C","19 °C","−5 °C"], a:0},
+    {t:"mc", q:"Сүңгуір теңіз деңгейінен −18 м тереңдікте жүзіп жүрді. Ол 7 м жоғары көтерілді. Сүңгуір енді қандай тереңдікте?",
+     o:["−11 м","−25 м","11 м","25 м"], a:0},
+    {t:"mc", q:"Дүкен бірінші күні 4 500 теңге пайда тапты, ал екінші күні 6 200 теңге шығынға ұшырады. Екі күннің қорытындысы қандай? (пайда «+», шығын «−» таңбасымен)",
+     o:["−1 700 теңге","1 700 теңге","10 700 теңге","−10 700 теңге"], a:0},
+    {t:"mc", q:"Ұшақ 9 800 м биіктікте ұшып келе жатты. Алдымен ол 2 450 м төмендеді, содан кейін 1 200 м жоғары көтерілді. Ұшақ қандай биіктікте ұшып келеді?",
+     o:["8 550 м","6 150 м","13 450 м","8 650 м"], a:0},
+    {t:"mc", q:"Кешкі сағат 18:00-де ауа температурасы 3 °C болды. Әр сағат сайын температура 1,5 °C-қа төмендеді. Сағат 22:00-де ауа температурасы қандай болды?",
+     o:["−3 °C","9 °C","−9 °C","0 °C"], a:0},
+    {t:"mc", q:`Бірінші сағатта бассейннің ${fr(2,5)} бөлігі, ал екінші сағатта ${fr(1,3)} бөлігі суға толды. Екі сағатта бассейннің қандай бөлігі толды?`,
+     o:[fr(11,15), fr(3,8), fr(3,15), fr(1,15)], a:0},
+    {t:"mc", q:"Велосипедші 2,4 сағатта 31,2 км жол жүрді. Велосипедшінің жылдамдығын табыңыз.",
+     o:["13 км/сағ","12 км/сағ","74,88 км/сағ","1,3 км/сағ"], a:0},
+    {t:"mc", q:"Үш күн бойы түнгі ауа температурасы өлшенді: −4 °C, 2 °C және −7 °C. Үш күндегі орташа температураны табыңыз.",
+     o:["−3 °C","3 °C","−9 °C","−1 °C"], a:0},
+    {t:"num", q:"Асқардың банк картасында 12 500 теңге бар. Ол несиелік лимитті пайдаланып, 15 300 теңгеге тауар сатып алды. Картадағы қалдық қандай болды?<br><br>Жауапты сан түрінде енгізіңіз (теріс сан болса, «−» таңбасын қойыңыз).",
+     a:-2800, unit:"теңге"},
+    {t:"num", q:`Арқанның ${fr(3,8)} бөлігі 12 м-ге тең. Арқанның бүкіл ұзындығы қанша метр?<br><br>Жауапты сан түрінде енгізіңіз.`,
+     a:32, unit:"м"}
+  ],
+  2: [
+    {t:"mc", q:"Таңертең ауа температурасы −9 °C болды. Түске қарай температура 13 °C-қа көтерілді. Түстегі ауа температурасы қандай?",
+     o:["4 °C","−22 °C","22 °C","−4 °C"], a:0},
+    {t:"mc", q:"Сүңгуір теңіз деңгейінен −24 м тереңдікте жүзіп жүрді. Ол 9 м жоғары көтерілді. Сүңгуір енді қандай тереңдікте?",
+     o:["−15 м","−33 м","15 м","33 м"], a:0},
+    {t:"mc", q:"Дүкен бірінші күні 5 300 теңге пайда тапты, ал екінші күні 7 100 теңге шығынға ұшырады. Екі күннің қорытындысы қандай? (пайда «+», шығын «−» таңбасымен)",
+     o:["−1 800 теңге","1 800 теңге","12 400 теңге","−12 400 теңге"], a:0},
+    {t:"mc", q:"Ұшақ 10 500 м биіктікте ұшып келе жатты. Алдымен ол 3 250 м төмендеді, содан кейін 1 400 м жоғары көтерілді. Ұшақ қандай биіктікте ұшып келеді?",
+     o:["8 650 м","5 850 м","15 150 м","8 750 м"], a:0},
+    {t:"mc", q:"Кешкі сағат 17:00-де ауа температурасы 4 °C болды. Әр сағат сайын температура 2,5 °C-қа төмендеді. Сағат 21:00-де ауа температурасы қандай болды?",
+     o:["−6 °C","14 °C","−10 °C","6 °C"], a:0},
+    {t:"mc", q:`Бірінші күні кітаптың ${fr(3,7)} бөлігі, ал екінші күні ${fr(1,4)} бөлігі оқылды. Екі күнде кітаптың қандай бөлігі оқылды?`,
+     o:[fr(19,28), fr(4,11), fr(4,28), fr(5,28)], a:0},
+    {t:"mc", q:"Велосипедші 2,5 сағатта 37,5 км жол жүрді. Велосипедшінің жылдамдығын табыңыз.",
+     o:["15 км/сағ","14 км/сағ","93,75 км/сағ","1,5 км/сағ"], a:0},
+    {t:"mc", q:"Үш күн бойы түнгі ауа температурасы өлшенді: −6 °C, 1 °C және −10 °C. Үш күндегі орташа температураны табыңыз.",
+     o:["−5 °C","5 °C","−15 °C","−1 °C"], a:0},
+    {t:"num", q:"Айгерімнің банк картасында 14 200 теңге бар. Ол несиелік лимитті пайдаланып, 17 600 теңгеге тауар сатып алды. Картадағы қалдық қандай болды?<br><br>Жауапты сан түрінде енгізіңіз (теріс сан болса, «−» таңбасын қойыңыз).",
+     a:-3400, unit:"теңге"},
+    {t:"num", q:`Сымның ${fr(5,9)} бөлігі 20 м-ге тең. Сымның бүкіл ұзындығы қанша метр?<br><br>Жауапты сан түрінде енгізіңіз.`,
+     a:36, unit:"м"}
+  ]
+};
+
+/* ===================== КҮЙ ===================== */
+const $ = id => document.getElementById(id);
+const LETTERS = ["A","B","C","D"];
+let S = null;      // тест күйі
+let tick = null;
+
+/* --- Бастапқы терезе --- */
+function checkStart(){
+  const ok = $("fio").value.trim().length >= 3 && $("cls").value &&
+             document.querySelector('input[name="var"]:checked');
+  $("btnStart").disabled = !ok;
+}
+$("fio").addEventListener("input", checkStart);
+$("cls").addEventListener("change", checkStart);
+document.querySelectorAll('input[name="var"]').forEach(r => r.addEventListener("change", checkStart));
+
+$("btnStart").addEventListener("click", () => {
+  const name = $("fio").value.trim().replace(/\s+/g," ");
+  const cls  = $("cls").value;
+  const v    = document.querySelector('input[name="var"]:checked').value;
+
+  // Құрылғыдағы әрекет саны (қосымша)
+  const key = "att6_mat_" + (name.toLowerCase()+"|"+cls);
+  let localAttempt = 1;
+  try { localAttempt = (parseInt(localStorage.getItem(key)||"0",10) || 0) + 1;
+        localStorage.setItem(key, localAttempt); } catch(e){}
+
+  // Жауап нұсқаларын араластыру
+  const qs = VARIANTS[v].map(q => {
+    if (q.t !== "mc") return {...q};
+    const idx = q.o.map((_,i)=>i);
+    for (let i=idx.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]]; }
+    return {...q, o: idx.map(i=>q.o[i]), a: idx.indexOf(q.a)};
+  });
+
+  S = { name, cls, variant:v, qs, i:0, answers:[], correct:[],
+        hides:0, startedAt:Date.now(), deadline:0, running:true, localAttempt };
+
+  $("start").classList.add("hidden");
+  $("quiz").classList.remove("hidden");
+  $("who").textContent = `${name} · ${cls} · ${v}-нұсқа`;
+  window.addEventListener("beforeunload", beforeUnload);
+  showQ();
+});
+
+/* --- Сұрақты көрсету --- */
+function showQ(){
+  const q = S.qs[S.i];
+  $("qnum").textContent = `${S.i+1}-тапсырма (${S.qs.length}-тен)`;
+  $("qtext").innerHTML = q.q;
+  $("bar").style.width = (S.i / S.qs.length * 100) + "%";
+  $("btnNext").textContent = S.i === S.qs.length-1 ? "Тестті аяқтау" : "Келесі →";
+  $("btnNext").disabled = true;
+
+  const box = $("answers");
+  box.innerHTML = "";
+  if (q.t === "mc"){
+    q.o.forEach((txt,k) => {
+      const lab = document.createElement("label");
+      lab.className = "opt";
+      lab.innerHTML = `<input type="radio" name="ans" value="${k}"><span class="lt">${LETTERS[k]})</span><span>${txt}</span>`;
+      lab.addEventListener("click", () => {
+        box.querySelectorAll(".opt").forEach(o=>o.classList.remove("sel"));
+        lab.classList.add("sel");
+        lab.querySelector("input").checked = true;
+        $("btnNext").disabled = false;
+      });
+      box.appendChild(lab);
+    });
+  } else {
+    box.innerHTML = `
+      <label class="f" for="numIn">Жауап${q.unit ? " ("+q.unit+")" : ""}:</label>
+      <input type="text" id="numIn" class="numbox" inputmode="decimal" autocomplete="off" placeholder="Санды енгізіңіз">
+      <div class="hint">Тек сан жазыңыз. Ондық бөлшекті үтірмен немесе нүктемен жазуға болады.</div>`;
+    const inp = $("numIn");
+    inp.addEventListener("input", () => { $("btnNext").disabled = parseNum(inp.value) === null; });
+    inp.addEventListener("keydown", e => { if (e.key==="Enter" && !$("btnNext").disabled) next(false); });
+    inp.focus();
+  }
+
+  S.deadline = Date.now() + TIME_PER_Q*1000;
+  clearInterval(tick);
+  renderTimer();
+  tick = setInterval(renderTimer, 250);
+}
+
+function renderTimer(){
+  const left = Math.max(0, Math.ceil((S.deadline - Date.now())/1000));
+  const m = String(Math.floor(left/60)).padStart(2,"0"), s = String(left%60).padStart(2,"0");
+  $("timer").textContent = `${m}:${s}`;
+  $("timer").classList.toggle("low", left <= 30);
+  if (left <= 0) next(true);
+}
+
+function parseNum(str){
+  let s = String(str).trim().replace(/[−–—]/g,"-").replace(/\s+/g,"").replace(",",".");
+  if (!/^[-+]?\d+(\.\d+)?$/.test(s)) return null;
+  return parseFloat(s);
+}
+
+/* --- Келесі сұрақ --- */
+function next(timeout){
+  if (!S || !S.running) return;
+  clearInterval(tick);
+  const q = S.qs[S.i];
+  let given = "", ok = false;
+
+  if (q.t === "mc"){
+    const c = document.querySelector('input[name="ans"]:checked');
+    if (c){ const k = +c.value; given = LETTERS[k]; ok = (k === q.a); }
+  } else {
+    const inp = $("numIn");
+    const val = inp ? parseNum(inp.value) : null;
+    if (val !== null){ given = String(val); ok = Math.abs(val - q.a) < 1e-9; }
+  }
+  if (!given) given = timeout ? "уақыт бітті" : "—";
+  S.answers.push(given);
+  S.correct.push(ok ? 1 : 0);
+
+  S.i++;
+  if (S.i < S.qs.length) showQ();
+  else finish();
+}
+$("btnNext").addEventListener("click", () => next(false));
+
+/* --- Қойындыны жасыруды бақылау --- */
+document.addEventListener("visibilitychange", () => {
+  if (!S || !S.running) return;
+  if (document.hidden){
+    S.hides++;
+  } else {
+    $("hideCount").textContent = S.hides;
+    $("modal").classList.add("show");
+    const w = $("warnline");
+    w.style.display = "block";
+    w.textContent = `Назар аударыңыз: бетті жасыру саны — ${S.hides}. Бағаңыз ${PENALTY} балға төмендетіледі.`;
+  }
+});
+$("btnModal").addEventListener("click", () => $("modal").classList.remove("show"));
+
+function beforeUnload(e){ if (S && S.running){ e.preventDefault(); e.returnValue = ""; } }
+
+/* --- Аяқтау --- */
+function finish(){
+  S.running = false;
+  clearInterval(tick);
+  window.removeEventListener("beforeunload", beforeUnload);
+  $("modal").classList.remove("show");
+
+  const raw = S.correct.reduce((a,b)=>a+b,0);
+  const pen = S.hides > 0 ? PENALTY : 0;
+  const final = Math.max(0, raw - pen);
+  const sec = Math.round((Date.now()-S.startedAt)/1000);
+  const dur = `${Math.floor(sec/60)} мин ${sec%60} с`;
+
+  $("quiz").classList.add("hidden");
+  $("result").classList.remove("hidden");
+  $("scoreBig").textContent = `${final} / 10`;
+  $("resTable").innerHTML = `
+    <tr><td>Аты-жөні</td><td>${escapeHtml(S.name)}</td></tr>
+    <tr><td>Сынып / нұсқа</td><td>${S.cls} · ${S.variant}-нұсқа</td></tr>
+    <tr><td>Дұрыс жауаптар</td><td>${raw} / 10</td></tr>
+    <tr><td>Бетті жасыру саны</td><td>${S.hides}</td></tr>
+    <tr><td>Айып балл</td><td>${pen ? "−"+pen : "0"}</td></tr>
+    <tr><td>Қорытынды балл</td><td><strong>${final} / 10</strong></td></tr>
+    <tr><td>Жұмсалған уақыт</td><td>${dur}</td></tr>`;
+
+  const payload = {
+    name: S.name, cls: S.cls, variant: S.variant, topic: TOPIC,
+    raw, penalty: pen, score: final, max: 10,
+    hidden: S.hides > 0 ? "Иә" : "Жоқ", hides: S.hides,
+    duration: dur, localAttempt: S.localAttempt,
+    answers: S.answers.map((a,k)=>`${k+1}: ${a} ${S.correct[k] ? "✓" : "✗"}`).join("; ")
+  };
+  send(payload, 0);
+}
+
+function send(payload, attempt){
+  if (!SCRIPT_URL || SCRIPT_URL.indexOf("http") !== 0){
+    $("sendStatus").textContent = "Нәтиже жіберілмеді: тестте Google Таблица сілтемесі көрсетілмеген. Мұғалімге хабарлаңыз.";
+    return;
+  }
+  fetch(SCRIPT_URL, {
+    method:"POST", mode:"no-cors",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body: JSON.stringify(payload)
+  }).then(() => {
+    $("sendStatus").textContent = "✓ Нәтиже мұғалімге жіберілді. Бетті жабуға болады.";
+  }).catch(() => {
+    if (attempt < 3){
+      $("sendStatus").textContent = "Байланыс жоқ, қайта жіберілуде…";
+      setTimeout(()=>send(payload, attempt+1), 3000);
+    } else {
+      $("sendStatus").textContent = "Нәтиже жіберілмеді (интернет байланысын тексеріңіз). Бетті жаппай, мұғалімге хабарлаңыз.";
+    }
+  });
+}
+
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+</script>
+</body>
+</html>
